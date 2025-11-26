@@ -21,18 +21,18 @@ public class ThreatFetcher extends Thread {
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
 
-            BufferedReader reader = new BufferedReader(
+            try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(conn.getInputStream())
-            );
+            )) {
 
-            String line, result = "";
-            while ((line = reader.readLine()) != null) {
-                result += line;
+                String line, result = "";
+                while ((line = reader.readLine()) != null) {
+                    result += line;
+                }
+
+                return new JSONObject(result);
             }
-
-            return new JSONObject(result);
-
-        } catch (Exception e) {
+        } catch (java.io.IOException | org.json.JSONException e) {
             return null;
         }
     }
