@@ -51,7 +51,11 @@ public class ThreatFetcher extends Thread {
                 ui.updatePie(threat);
             }
 
-            try { Thread.sleep(2000); } catch (Exception ignored) {}
+            try { extracted(); } catch (InterruptedException ignored) {}
         }
+    }
+
+    private void extracted() throws InterruptedException {
+        sleep(2000);
     }
 }
