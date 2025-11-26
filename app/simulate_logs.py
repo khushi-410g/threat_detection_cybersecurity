@@ -26,4 +26,5 @@ def generate_logs(n=800):
     print("✔ Logs created → data/network_logs.csv")
 
 if __name__ == "__main__":
+    
     generate_logs()
