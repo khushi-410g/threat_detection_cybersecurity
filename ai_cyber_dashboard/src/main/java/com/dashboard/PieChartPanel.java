@@ -12,10 +12,10 @@ import org.jfree.data.general.DefaultPieDataset;
 
 public class PieChartPanel extends JPanel {
 
-    DefaultPieDataset dataset;
+    DefaultPieDataset<String> dataset;
 
     public PieChartPanel() {
-        dataset = new DefaultPieDataset();
+        dataset = new DefaultPieDataset<>();
         dataset.setValue("normal", 1);
         dataset.setValue("port_scan", 1);
         dataset.setValue("ddos", 1);
@@ -29,7 +29,8 @@ public class PieChartPanel extends JPanel {
             false
         );
 
-        PiePlot plot = (PiePlot) chart.getPlot();
+        @SuppressWarnings("unchecked")
+        PiePlot<String> plot = (PiePlot<String>) chart.getPlot();
         plot.setSectionOutlinesVisible(false);
 
         setLayout(new BorderLayout());
