@@ -8,11 +8,27 @@
   <name>ai_cyber_dashboard</name>
   <url>http://maven.apache.org</url>
   <dependencies>
+
+    <!-- FlatLaf Modern Theme -->
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
+        <groupId>com.formdev</groupId>
+        <artifactId>flatlaf</artifactId>
+        <version>3.2.5</version>
     </dependency>
-  </dependencies>
+
+    <!-- JFreeChart for Pie Chart -->
+    <dependency>
+        <groupId>org.jfree</groupId>
+        <artifactId>jfreechart</artifactId>
+        <version>1.5.4</version>
+    </dependency>
+
+    <!-- JSON parser -->
+    <dependency>
+        <groupId>org.json</groupId>
+        <artifactId>json</artifactId>
+        <version>20231013</version>
+    </dependency>
+
+</dependencies>
 </project>
