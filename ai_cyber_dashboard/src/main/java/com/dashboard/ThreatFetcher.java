@@ -17,7 +17,7 @@ public class ThreatFetcher extends Thread {
 
     private JSONObject getThreat() {
         try {
-            URL url = new URL("http://localhost:5000/detect");
+            URL url = new URL("http://127.0.0.1:5000/detect");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
 
@@ -33,6 +33,7 @@ public class ThreatFetcher extends Thread {
                 return new JSONObject(result);
             }
         } catch (java.io.IOException | org.json.JSONException e) {
+            System.out.println("ERROR while fetching: " + e.getMessage());
             return null;
         }
     }
