@@ -1,37 +1,43 @@
 package com.dashboard;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+
+import javax.swing.JPanel;
+
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PiePlot;
+import org.jfree.data.general.DefaultPieDataset;
 
 public class PieChartPanel extends JPanel {
 
-    public void paintComponent(Graphics g) {
-        super.paintComponent(g);
+    DefaultPieDataset dataset;
 
-        ThreatFetcher fetcher = new ThreatFetcher();
+    public PieChartPanel() {
+        dataset = new DefaultPieDataset();
+        dataset.setValue("normal", 1);
+        dataset.setValue("port_scan", 1);
+        dataset.setValue("ddos", 1);
+        dataset.setValue("brute_force", 1);
 
-        int malware = fetcher.getMalwareCount();
-        int phishing = fetcher.getPhishingCount();
-        int ransomware = fetcher.getRansomwareCount();
+        JFreeChart chart = ChartFactory.createPieChart(
+            "Attack Types",
+            dataset,
+            true,
+            true,
+            false
+        );
 
-        int total = malware + phishing + ransomware;
-        int startAngle = 0;
+        PiePlot plot = (PiePlot) chart.getPlot();
+        plot.setSectionOutlinesVisible(false);
 
-        // Malware slice
-        int angle = (int) ((malware * 360.0) / total);
-        g.setColor(Color.RED);
-        g.fillArc(50, 50, 300, 300, startAngle, angle);
-        startAngle += angle;
+        setLayout(new BorderLayout());
+        add(new ChartPanel(chart), BorderLayout.CENTER);
+    }
 
-        // Phishing slice
-        angle = (int) ((phishing * 360.0) / total);
-        g.setColor(Color.BLUE);
-        g.fillArc(50, 50, 300, 300, startAngle, angle);
-        startAngle += angle;
-
-        // Ransomware slice
-        angle = (int) ((ransomware * 360.0) / total);
-        g.setColor(Color.GREEN);
-        g.fillArc(50, 50, 300, 300, startAngle, angle);
+    public void increment(String threat) {
+        Number current = dataset.getValue(threat);
+        dataset.setValue(threat, current.intValue() + 1);
     }
 }
