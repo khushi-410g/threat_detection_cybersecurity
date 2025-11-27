@@ -1,6 +1,7 @@
 from faker import Faker
 import pandas as pd
 import random
+from datetime import datetime
 
 fake = Faker()
 
@@ -11,6 +12,7 @@ def generate_logs(n=800):
 
     for _ in range(n):
         logs.append([
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),   # <-- NEW TIMESTAMP
             fake.ipv4(),
             random.choice([22, 80, 443, 8080, 53]),
             random.randint(50, 2000),
@@ -19,12 +21,11 @@ def generate_logs(n=800):
         ])
 
     df = pd.DataFrame(logs, columns=[
-        "src_ip", "dst_port", "packet_size", "protocol", "label"
+        "time", "src_ip", "dst_port", "packet_size", "protocol", "label"
     ])
 
     df.to_csv("data/network_logs.csv", index=False)
     print("✔ Logs created → data/network_logs.csv")
 
 if __name__ == "__main__":
-    
     generate_logs()
