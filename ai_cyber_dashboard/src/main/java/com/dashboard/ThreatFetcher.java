@@ -43,6 +43,7 @@ public class ThreatFetcher extends Thread {
     @Override
     public void run() {
         while (true) {
+            System.out.println("Fetching from Python...");
 
             JSONArray arr = fetchThreatList();
             if (arr != null) {
