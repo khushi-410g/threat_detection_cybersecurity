@@ -16,6 +16,26 @@ public class ThreatFetcher extends Thread {
         this.ui = ui;
     }
 
+    // ⭐⭐ ADD THIS METHOD HERE ⭐⭐
+    private void waitForBackend() {
+        while (true) {
+            try {
+                URL url = new URL("http://127.0.0.1:5000/detect");
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setConnectTimeout(1000);
+                conn.connect();
+                System.out.println("💚 Backend is ready!");
+                return;
+            } catch (Exception e) {
+                System.out.println("⏳ Waiting for backend...");
+            }
+
+            try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
+        }
+    }
+    // ⭐⭐ END ⭐⭐
+
+
     private JSONArray fetchThreatList() {
         try {
             URL url = new URL("http://127.0.0.1:5000/detect");
@@ -31,7 +51,7 @@ public class ThreatFetcher extends Thread {
                     result += line;
                 }
 
-                return new JSONArray(result);   // <-- FIXED
+                return new JSONArray(result);
             }
 
         } catch (Exception e) {
@@ -42,9 +62,11 @@ public class ThreatFetcher extends Thread {
 
     @Override
     public void run() {
-        while (true) {
-            System.out.println("Fetching from Python...");
 
+        // ⭐⭐ CALL WAIT FOR BACKEND BEFORE STARTING FETCH LOOP ⭐⭐
+        waitForBackend();
+
+        while (true) {
             JSONArray arr = fetchThreatList();
             if (arr != null) {
 
