@@ -35,7 +35,7 @@ def detect():
             "ip": row["src_ip"],
             "threat": pred,
             "confidence": float(conf),
-            "time": row["timestamp"]
+            "time": row["time"]
         })
 
     return jsonify(results)
