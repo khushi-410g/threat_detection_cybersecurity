@@ -64,10 +64,11 @@ public class DashboardUI extends JFrame {
         alertArea.append(text + "\n");
     }
 
-    public void addTableRow(String ip, String threat, double conf) {
-        DefaultTableModel model = (DefaultTableModel) table.getModel();
-        model.addRow(new Object[] { ip, threat, conf, java.time.LocalTime.now().toString() });
-    }
+    public void addTableRow(String ip, String threat, double conf, String time) {
+    DefaultTableModel model = (DefaultTableModel) table.getModel();
+    model.addRow(new Object[] { ip, threat, conf, time });
+ }
+
 
     public void updatePie(String threat) {
         piePanel.increment(threat);
