@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class ThreatFetcher extends Thread {
@@ -15,14 +16,14 @@ public class ThreatFetcher extends Thread {
         this.ui = ui;
     }
 
-    private JSONObject getThreat() {
+    private JSONArray fetchThreatList() {
         try {
             URL url = new URL("http://127.0.0.1:5000/detect");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
 
             try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(conn.getInputStream())
+                    new InputStreamReader(conn.getInputStream())
             )) {
 
                 String line, result = "";
@@ -30,10 +31,11 @@ public class ThreatFetcher extends Thread {
                     result += line;
                 }
 
-                return new JSONObject(result);
+                return new JSONArray(result);   // <-- FIXED
             }
-        } catch (java.io.IOException | org.json.JSONException e) {
-            System.out.println("ERROR while fetching: " + e.getMessage());
+
+        } catch (Exception e) {
+            System.out.println("ERROR fetching threats: " + e.getMessage());
             return null;
         }
     }
@@ -41,22 +43,25 @@ public class ThreatFetcher extends Thread {
     @Override
     public void run() {
         while (true) {
-            JSONObject data = getThreat();
-            if (data != null) {
-                String threat = data.getString("threat");
-                double conf = data.getDouble("confidence");
-                String ip = data.getString("ip");
 
-                ui.addAlert("[" + threat + "] from " + ip + " | Conf=" + conf);
-                ui.addTableRow(ip, threat, conf);
-                ui.updatePie(threat);
+            JSONArray arr = fetchThreatList();
+            if (arr != null) {
+
+                for (int i = 0; i < arr.length(); i++) {
+                    JSONObject data = arr.getJSONObject(i);
+
+                    String threat = data.getString("threat");
+                    double conf = data.getDouble("confidence");
+                    String ip = data.getString("ip");
+                    String time = data.getString("time");
+
+                    ui.addAlert("[" + threat + "] from " + ip + " | Conf=" + conf);
+                    ui.addTableRow(ip, threat, conf);
+                    ui.updatePie(threat);
+                }
             }
 
-            try { extracted(); } catch (InterruptedException ignored) {}
+            try { sleep(2000); } catch (InterruptedException ignored) {}
         }
-    }
-
-    private void extracted() throws InterruptedException {
-        sleep(2000);
     }
 }
