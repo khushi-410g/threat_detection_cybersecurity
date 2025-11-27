@@ -56,8 +56,7 @@ public class ThreatFetcher extends Thread {
                     String time = data.getString("time");
 
                     ui.addAlert("[" + threat + "] from " + ip + " | Conf=" + conf);
-                    ui.addTableRow(ip, threat, conf);
-                    ui.updatePie(threat);
+                    ui.addTableRow(ip, threat, conf, time);
                 }
             }
 
