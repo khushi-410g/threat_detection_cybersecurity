@@ -1,9 +1,13 @@
 package com.dashboard;
 
+import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
@@ -21,7 +25,7 @@ public class DashboardUI extends JFrame {
     JTable table;
     PieChartPanel piePanel;
     TimeSeriesPanel timePanel;
-
+s
 
 
     public DashboardUI() {
