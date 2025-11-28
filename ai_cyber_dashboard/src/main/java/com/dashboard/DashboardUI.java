@@ -26,56 +26,69 @@ public class DashboardUI extends JFrame {
     PieChartPanel piePanel;
     TimeSeriesPanel timePanel;
 
-    public DashboardUI() {
-        setTitle("AI-Powered Threat Dashboard");
-        setSize(1200, 750);
-        setLocationRelativeTo(null);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
+   public DashboardUI() {
+    setTitle("AI-Powered Threat Dashboard");
+    setSize(1200, 800);
+    setLocationRelativeTo(null);
+    setDefaultCloseOperation(EXIT_ON_CLOSE);
+    setLayout(new GridBagLayout());
 
-        // ---------------- TOP BAR ----------------
-        JPanel topPanel = new JPanel(new BorderLayout());
+    GridBagConstraints gbc = new GridBagConstraints();
+    gbc.insets = new Insets(5,5,5,5);
+    gbc.fill = GridBagConstraints.BOTH;
 
-        JLabel header = new JLabel("AI-Powered Threat Dashboard", JLabel.CENTER);
-        header.setFont(new Font("Verdana", Font.BOLD, 26));
+    // ▓▓▓ HEADER
+    JLabel header = new JLabel("AI-Powered Threat Dashboard", JLabel.CENTER);
+    header.setFont(new Font("Verdana", Font.BOLD, 26));
+    gbc.gridx = 0; gbc.gridy = 0;
+    gbc.gridwidth = 3; gbc.weightx = 1;
+    gbc.weighty = 0.1;
+    add(header, gbc);
 
-        JButton trainBtn = new JButton("Retrain AI Model");
-        trainBtn.addActionListener(e -> showTrainingPopup());
+    // ▓▓▓ LEFT: Alerts
+    alertArea = new JTextArea();
+    alertArea.setEditable(false);
+    JScrollPane alertScroll = new JScrollPane(alertArea);
+    alertScroll.setBorder(BorderFactory.createTitledBorder("Live Alerts"));
 
-        topPanel.add(header, BorderLayout.CENTER);
-        topPanel.add(trainBtn, BorderLayout.EAST);
+    gbc.gridx = 0; gbc.gridy = 1;
+    gbc.gridwidth = 1;
+    gbc.weightx = 0.3;
+    gbc.weighty = 0.4;
+    add(alertScroll, gbc);
 
-        add(topPanel, BorderLayout.NORTH);
+    // ▓▓▓ CENTER: Pie Chart
+    piePanel = new PieChartPanel();
+    piePanel.setBorder(BorderFactory.createTitledBorder("Attack Statistics"));
 
-        // ---------------- LEFT SIDE ----------------
-        JPanel leftPanel = new JPanel(new BorderLayout());
+    gbc.gridx = 1; gbc.gridy = 1;
+    gbc.weightx = 0.4;
+    add(piePanel, gbc);
 
-        alertArea = new JTextArea();
-        alertArea.setEditable(false);
-        JScrollPane alertScroll = new JScrollPane(alertArea);
-        alertScroll.setBorder(BorderFactory.createTitledBorder("Live Alerts"));
+    // ▓▓▓ RIGHT: Table
+    String[] cols = {"IP", "Threat", "Confidence", "Time"};
+    table = new JTable(new DefaultTableModel(cols, 0));
+    JScrollPane tableScroll = new JScrollPane(table);
+    tableScroll.setBorder(BorderFactory.createTitledBorder("Network Map"));
 
-        piePanel = new PieChartPanel();
-        piePanel.setBorder(BorderFactory.createTitledBorder("Attack Statistics"));
+    gbc.gridx = 2; gbc.gridy = 1;
+    gbc.weightx = 0.3;
+    add(tableScroll, gbc);
 
-        leftPanel.add(alertScroll, BorderLayout.CENTER);
-        leftPanel.add(piePanel, BorderLayout.SOUTH);
+    // ▓▓▓ BOTTOM: Time-Series Chart
+    timePanel = new TimeSeriesPanel();
+    timePanel.setBorder(BorderFactory.createTitledBorder("Last 60 sec Threat Timeline"));
 
-        add(leftPanel, BorderLayout.WEST);
+    gbc.gridx = 0; gbc.gridy = 2;
+    gbc.gridwidth = 3;
+    gbc.weightx = 1;
+    gbc.weighty = 0.5;
+    add(timePanel, gbc);
 
-        // ---------------- CENTER TABLE ----------------
-        String[] cols = {"IP", "Threat", "Confidence", "Time"};
-        table = new JTable(new DefaultTableModel(cols, 0));
+    // Start real-time updates
+    new ThreatFetcher(this).start();
+}
 
-        JScrollPane tableScroll = new JScrollPane(table);
-        tableScroll.setBorder(BorderFactory.createTitledBorder("Network Map"));
-
-        add(tableScroll, BorderLayout.CENTER);
-
-        // ---------------- BOTTOM TIME-SERIES CHART ----------------
-        timePanel = new TimeSeriesPanel();   // FIXED: Assign correctly
-        add(timePanel, BorderLayout.SOUTH);
-    }
 
     // --------------------------------------------------------------
     // START FETCHER
