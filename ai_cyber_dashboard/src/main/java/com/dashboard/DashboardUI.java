@@ -2,6 +2,7 @@ package com.dashboard;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
 
 import javax.swing.BorderFactory;
@@ -11,6 +12,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 public class DashboardUI extends JFrame {
@@ -92,9 +94,27 @@ public class DashboardUI extends JFrame {
    }
 
 
-    public void addTableRow(String ip, String threat, double conf, String time) {
+   public void addTableRow(String ip, String threat, double conf, String time) {
+
     DefaultTableModel model = (DefaultTableModel) table.getModel();
-    model.addRow(new Object[] { ip, threat, conf, time });
+    model.addRow(new Object[]{ip, threat, conf, time});
+
+    table.setDefaultRenderer(Object.class, (tbl, value, isSelected, hasFocus, row, col) -> {
+        Component c = new DefaultTableCellRenderer().getTableCellRendererComponent(
+                tbl, value, isSelected, hasFocus, row, col
+        );
+
+        String t = (String) tbl.getValueAt(row, 1); // threat column
+
+        if (t.equals("ddos") || t.equals("brute_force"))
+            c.setBackground(new Color(255, 80, 80));   // red
+        else if (t.equals("port_scan"))
+            c.setBackground(new Color(255, 180, 80)); // orange
+        else
+            c.setBackground(new Color(120, 255, 120)); // green
+
+        return c;
+        });
     }
 
 
