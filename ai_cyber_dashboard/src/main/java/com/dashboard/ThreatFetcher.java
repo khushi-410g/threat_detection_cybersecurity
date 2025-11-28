@@ -7,6 +7,7 @@ import java.net.URL;
 
 import javax.swing.Timer;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class ThreatFetcher {
@@ -17,52 +18,56 @@ public class ThreatFetcher {
         this.ui = ui;
     }
 
+    // Auto-refresh every 2 sec
     public void start() {
         new Timer(2000, e -> fetchAndUpdate()).start();
     }
 
     private void fetchAndUpdate() {
-        JSONObject obj = fetchThreat();
-        if (obj == null) return;
 
-        String ip = obj.getString("ip");
-        String threat = obj.getString("threat");
-        double conf = obj.getDouble("confidence");
-        String time = obj.getString("time");
+        JSONArray arr = fetchThreatList();
+        if (arr == null) return;
 
-        ui.addAlert(threat, ip, conf, time);
-        ui.addTableRow(ip, threat, conf, time);
-        ui.updatePie(threat);
+        for (int i = 0; i < arr.length(); i++) {
 
-        // Severity-based graph spike
-        int value = switch (threat) {
-            case "port_scan" -> 1;
-            case "brute_force" -> 2;
-            case "ddos" -> 3;
-            default -> 0;
-        };
+            JSONObject data = arr.getJSONObject(i);
 
-        ui.updateTimeSeries(value);
+            String threat = data.optString("threat", "normal");
+            double conf    = data.optDouble("confidence", 0.0);
+            String ip      = data.optString("ip", "N/A");
+            String time    = data.optString("time", "N/A");
+
+            // Update UI components
+            ui.addAlert(threat, ip, conf, time);
+            ui.addTableRow(ip, threat, conf, time);
+            ui.updatePie(threat);
+            ui.updateTimeSeries(threat);
+        }
     }
 
-    private JSONObject fetchThreat() {
+    private JSONArray fetchThreatList() {
+
         try {
             URL url = new URL("http://127.0.0.1:5000/detect");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setConnectTimeout(2000);
+            conn.setReadTimeout(2000);
             conn.setRequestMethod("GET");
 
             BufferedReader reader = new BufferedReader(
-                new InputStreamReader(conn.getInputStream())
+                    new InputStreamReader(conn.getInputStream())
             );
 
-            StringBuilder sb = new StringBuilder();
+            StringBuilder result = new StringBuilder();
             String line;
 
             while ((line = reader.readLine()) != null)
-                sb.append(line);
+                result.append(line);
 
-            return new JSONObject(sb.toString());
+            reader.close();
+
+            // API returns a JSON ARRAY
+            return new JSONArray(result.toString());
 
         } catch (Exception e) {
             System.out.println("⚠ Flask unreachable: " + e.getMessage());
