@@ -1,8 +1,7 @@
 package com.dashboard;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
+import java.io.IOException;
 
 public class PythonServer {
 
@@ -11,39 +10,26 @@ public class PythonServer {
     public void startServer() {
         try {
             String projectPath = "/home/khushigoel/Desktop/Threat Detection Private Repo /threat_detection_cybersecurity";
-            String pythonPath = projectPath + "/.venv/bin/python3";
-            String pythonApp = projectPath + "/app/app.py";
+            String pythonFile = projectPath + "/app/app.py";
 
-            ProcessBuilder pb = new ProcessBuilder(pythonPath, pythonApp);
-
-            // ⭐ Set working directory so Flask can find model/ folder
+            ProcessBuilder pb = new ProcessBuilder("python3", pythonFile);
             pb.directory(new File(projectPath));
 
             pb.redirectErrorStream(true);
+            pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+
             process = pb.start();
+            System.out.println("🔥 Flask backend started.");
 
-            // Thread to print Flask output
-            new Thread(() -> {
-                try (BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(process.getInputStream()))) {
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        System.out.println("[FLASK] " + line);
-                    }
-                } catch (Exception ignored) {}
-            }).start();
-
-            System.out.println("🔥 Python Flask server started.");
-
-        } catch (Exception e) {
-            System.out.println("❌ Failed to start Python backend: " + e.getMessage());
+        } catch (IOException e) {
+            System.out.println("❌ Failed to start Flask: " + e.getMessage());
         }
     }
 
     public void stopServer() {
-        if (process != null) {
+        if (process != null && process.isAlive()) {
             process.destroy();
-            System.out.println("🛑 Python server stopped.");
+            System.out.println("🛑 Flask backend stopped.");
         }
     }
 }

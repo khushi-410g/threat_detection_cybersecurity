@@ -3,23 +3,20 @@ package com.dashboard;
 import com.formdev.flatlaf.FlatDarculaLaf;
 
 public class Main {
-
     public static void main(String[] args) {
 
+        // Modern Dark Theme
         FlatDarculaLaf.setup();
 
-        // 1️⃣ Start Python Flask server
+        // Auto-start Python backend
         PythonServer server = new PythonServer();
         server.startServer();
 
-        // 2️⃣ Start Dashboard UI
+        // Launch UI
         DashboardUI ui = new DashboardUI();
         ui.setVisible(true);
 
-        // ❌ DO NOT call ui.startThreatFetcher()
-        // The DashboardUI constructor already starts ThreatFetcher.
-
-        // Optional: stop Python when Java closes
+        // Stop Python when closing app
         Runtime.getRuntime().addShutdownHook(new Thread(server::stopServer));
     }
 }

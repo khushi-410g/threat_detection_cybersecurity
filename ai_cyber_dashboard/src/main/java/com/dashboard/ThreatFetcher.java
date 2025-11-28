@@ -18,54 +18,53 @@ public class ThreatFetcher {
         this.ui = ui;
     }
 
-    // START AUTO-TIMER
     public void start() {
         new Timer(2000, e -> fetchAndUpdate()).start();
     }
 
-    // FETCH + UPDATE UI
     private void fetchAndUpdate() {
-
         JSONArray arr = fetchThreatList();
-
         if (arr == null) return;
 
         for (int i = 0; i < arr.length(); i++) {
-            JSONObject data = arr.getJSONObject(i);
+            JSONObject d = arr.getJSONObject(i);
 
-            String threat = data.getString("threat");
-            double conf = data.getDouble("confidence");
-            String ip = data.getString("ip");
-            String time = data.getString("time");
+            ui.addAlert(
+                    d.getString("threat"),
+                    d.getString("ip"),
+                    d.getDouble("confidence"),
+                    d.getString("time")
+            );
 
-            ui.addAlert(threat, ip, conf);
-            ui.addTableRow(ip, threat, conf, time);
-            ui.updatePie(threat);
+            ui.addTableRow(
+                    d.getString("ip"),
+                    d.getString("threat"),
+                    d.getDouble("confidence"),
+                    d.getString("time")
+            );
+
+            ui.updatePie(d.getString("threat"));
+            ui.updateTimeSeries(d.getString("threat"));
         }
     }
 
-    // FETCH JSON ARRAY FROM FLASK API
     private JSONArray fetchThreatList() {
         try {
             URL url = new URL("http://127.0.0.1:5000/detect");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
             conn.setConnectTimeout(1500);
 
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(conn.getInputStream())
-            );
-
-            StringBuilder result = new StringBuilder();
+            BufferedReader r = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            StringBuilder sb = new StringBuilder();
             String line;
 
-            while ((line = reader.readLine()) != null)
-                result.append(line);
+            while ((line = r.readLine()) != null)
+                sb.append(line);
 
-            return new JSONArray(result.toString());
+            return new JSONArray(sb.toString());
 
-        } catch (java.io.IOException | org.json.JSONException e) {
-            System.out.println("⚠️ Backend unreachable: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("⚠ Backend unreachable: " + e.getMessage());
             return null;
         }
     }
