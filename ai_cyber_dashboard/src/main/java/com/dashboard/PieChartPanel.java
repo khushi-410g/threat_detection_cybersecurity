@@ -13,11 +13,11 @@ import org.jfree.data.general.DefaultPieDataset;
 
 public class PieChartPanel extends JPanel {
 
-    DefaultPieDataset dataset;
+    DefaultPieDataset<String> dataset;
 
     public PieChartPanel() {
 
-        dataset = new DefaultPieDataset();
+        dataset = new DefaultPieDataset<>();
         dataset.setValue("normal", 1);
         dataset.setValue("port_scan", 1);
         dataset.setValue("ddos", 1);
