@@ -1,18 +1,17 @@
 package com.dashboard;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import javax.swing.Timer;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 public class ThreatFetcher {
 
-    private final DashboardUI ui;
+    private DashboardUI ui;
 
     public ThreatFetcher(DashboardUI ui) {
         this.ui = ui;
@@ -27,24 +26,18 @@ public class ThreatFetcher {
         if (arr == null) return;
 
         for (int i = 0; i < arr.length(); i++) {
-            JSONObject d = arr.getJSONObject(i);
+            JSONObject data = arr.getJSONObject(i);
 
-            ui.addAlert(
-                    d.getString("threat"),
-                    d.getString("ip"),
-                    d.getDouble("confidence"),
-                    d.getString("time")
-            );
+            String threat = data.getString("threat");
+            String ip = data.getString("ip");
+            double conf = data.getDouble("confidence");
+            String time = data.getString("time");
 
-            ui.addTableRow(
-                    d.getString("ip"),
-                    d.getString("threat"),
-                    d.getDouble("confidence"),
-                    d.getString("time")
-            );
-
-            ui.updatePie(d.getString("threat"));
-            ui.updateTimeSeries(d.getString("threat"));
+            // Update UI everywhere
+            ui.addAlert(threat, ip, conf);
+            ui.addTableRow(ip, threat, conf, time);
+            ui.updatePie(threat);
+            ui.updateTimeSeries(threat);
         }
     }
 
@@ -52,16 +45,17 @@ public class ThreatFetcher {
         try {
             URL url = new URL("http://127.0.0.1:5000/detect");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setConnectTimeout(1500);
+            conn.setRequestMethod("GET");
 
-            BufferedReader r = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            StringBuilder sb = new StringBuilder();
+            BufferedReader reader =
+                    new BufferedReader(new InputStreamReader(conn.getInputStream()));
+
+            StringBuilder result = new StringBuilder();
             String line;
+            while ((line = reader.readLine()) != null)
+                result.append(line);
 
-            while ((line = r.readLine()) != null)
-                sb.append(line);
-
-            return new JSONArray(sb.toString());
+            return new JSONArray(result.toString());
 
         } catch (Exception e) {
             System.out.println("⚠ Backend unreachable: " + e.getMessage());
