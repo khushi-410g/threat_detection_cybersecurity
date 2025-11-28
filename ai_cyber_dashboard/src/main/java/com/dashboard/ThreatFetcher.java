@@ -1,18 +1,15 @@
 package com.dashboard;
 
+import javax.swing.Timer;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
-import javax.swing.Timer;
-
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class ThreatFetcher {
 
-    private DashboardUI ui;
+    private final DashboardUI ui;
 
     public ThreatFetcher(DashboardUI ui) {
         this.ui = ui;
@@ -23,43 +20,44 @@ public class ThreatFetcher {
     }
 
     private void fetchAndUpdate() {
-        JSONArray arr = fetchThreatList();
-        if (arr == null) return;
+        JSONObject obj = fetchThreat();
+        if (obj == null) return;
 
-        for (int i = 0; i < arr.length(); i++) {
-            JSONObject data = arr.getJSONObject(i);
+        String ip = obj.getString("ip");
+        String threat = obj.getString("threat");
+        double conf = obj.getDouble("confidence");
+        String time = obj.getString("time");
 
-            String threat = data.getString("threat");
-            String ip = data.getString("ip");
-            double conf = data.getDouble("confidence");
-            String time = data.getString("time");
+        // Update UI panels
+        ui.addAlert(threat, ip, conf, time);
+        ui.addTableRow(ip, threat, conf, time);
+        ui.updatePie(threat);
 
-            // Update UI everywhere
-            ui.addAlert(threat, ip, conf, time);
-            ui.addTableRow(ip, threat, conf, time);
-            ui.updatePie(threat);
-            ui.updateTimeSeries(threat);
-        }
+        // Graph now receives 1 threat per fetch
+        ui.updateTimeSeries(1);
     }
 
-    private JSONArray fetchThreatList() {
+    private JSONObject fetchThreat() {
         try {
             URL url = new URL("http://127.0.0.1:5000/detect");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setConnectTimeout(2000);
             conn.setRequestMethod("GET");
 
-            BufferedReader reader =
-                    new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(conn.getInputStream())
+            );
 
-            StringBuilder result = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
             String line;
-            while ((line = reader.readLine()) != null)
-                result.append(line);
 
-            return new JSONArray(result.toString());
+            while ((line = reader.readLine()) != null)
+                sb.append(line);
+
+            return new JSONObject(sb.toString());
 
         } catch (Exception e) {
-            System.out.println("⚠ Backend unreachable: " + e.getMessage());
+            System.out.println("⚠ Flask unreachable: " + e.getMessage());
             return null;
         }
     }
