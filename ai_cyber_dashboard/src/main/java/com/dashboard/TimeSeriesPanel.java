@@ -15,26 +15,30 @@ import org.jfree.data.time.TimeSeriesCollection;
 
 public class TimeSeriesPanel extends JPanel {
 
-    private TimeSeries series;
+    private final TimeSeries series;
 
     public TimeSeriesPanel() {
         series = new TimeSeries("Threats");
 
+        TimeSeriesCollection dataset = new TimeSeriesCollection(series);
+
         JFreeChart chart = ChartFactory.createTimeSeriesChart(
-                "Last 60 sec Threat Timeline",
+                "Last 60 Sec Threat Timeline",
                 "Time",
                 "Threats",
-                new TimeSeriesCollection(series),
-                false,
-                true,
-                false
+                dataset,
+                false, true, false
         );
 
         XYPlot plot = chart.getXYPlot();
-        plot.setBackgroundPaint(Color.DARK_GRAY);
+        plot.setBackgroundPaint(new Color(40, 40, 40));
+        plot.setDomainGridlinePaint(Color.GRAY);
+        plot.setRangeGridlinePaint(Color.GRAY);
 
         setLayout(new BorderLayout());
         add(new ChartPanel(chart), BorderLayout.CENTER);
+
+        series.setMaximumItemCount(60);
     }
 
     public void updateSeries(String threat) {
