@@ -1,13 +1,14 @@
 package com.dashboard;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
+import javax.swing.Timer;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class ThreatFetcher {
 
@@ -34,7 +35,7 @@ public class ThreatFetcher {
             String time = data.getString("time");
 
             // Update UI everywhere
-            ui.addAlert(threat, ip, conf);
+            ui.addAlert(threat, ip, conf, time);
             ui.addTableRow(ip, threat, conf, time);
             ui.updatePie(threat);
             ui.updateTimeSeries(threat);
