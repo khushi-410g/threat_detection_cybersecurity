@@ -24,19 +24,27 @@ public class PieChartPanel extends JPanel {
         dataset.setValue("brute_force", 1);
 
         JFreeChart chart = ChartFactory.createPieChart(
-                "Attack Types", dataset, true, true, false
+                "Attack Types",
+                dataset,
+                true, true, false
         );
 
         PiePlot plot = (PiePlot) chart.getPlot();
-        plot.setBackgroundPaint(new Color(60, 60, 60));
-        plot.setLabelBackgroundPaint(new Color(80,80,80));
+
+        plot.setBackgroundPaint(new Color(20, 20, 30));
+        plot.setLabelBackgroundPaint(new Color(30, 30, 40));
+
+        plot.setSectionPaint("normal", Color.CYAN);
+        plot.setSectionPaint("port_scan", Color.BLUE);
+        plot.setSectionPaint("ddos", Color.RED);
+        plot.setSectionPaint("brute_force", Color.MAGENTA);
 
         setLayout(new BorderLayout());
         add(new ChartPanel(chart), BorderLayout.CENTER);
     }
 
     public void increment(String t) {
-        Number current = dataset.getValue(t);
-        dataset.setValue(t, current.intValue() + 1);
+        Number n = dataset.getValue(t);
+        dataset.setValue(t, n.intValue() + 1);
     }
 }

@@ -18,30 +18,30 @@ public class TimeSeriesPanel extends JPanel {
     private final TimeSeries series;
 
     public TimeSeriesPanel() {
-        series = new TimeSeries("Threats per second");
 
+        series = new TimeSeries("Threat Level");
         TimeSeriesCollection dataset = new TimeSeriesCollection(series);
 
         JFreeChart chart = ChartFactory.createTimeSeriesChart(
                 "Last 60 Sec Threat Timeline",
                 "Time",
-                "Threat Count",
+                "Threat Level",
                 dataset,
                 false, true, false
         );
 
         XYPlot plot = chart.getXYPlot();
-        plot.setBackgroundPaint(new Color(40, 40, 40));
-        plot.setDomainGridlinePaint(Color.GRAY);
-        plot.setRangeGridlinePaint(Color.GRAY);
+        plot.setBackgroundPaint(new Color(25, 25, 35));
+        plot.setDomainGridlinePaint(Color.CYAN);
+        plot.setRangeGridlinePaint(Color.MAGENTA);
+
+        series.setMaximumItemCount(60);
 
         setLayout(new BorderLayout());
         add(new ChartPanel(chart), BorderLayout.CENTER);
-
-        series.setMaximumItemCount(60);
     }
 
-    public void updateSeries(int threats) {
-        series.addOrUpdate(new Second(), threats);
+    public void updateSeries(int v) {
+        series.addOrUpdate(new Second(), v);
     }
 }
