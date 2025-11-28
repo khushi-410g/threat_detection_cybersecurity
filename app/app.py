@@ -13,32 +13,41 @@ def ip_hash(ip):
 
 @app.route("/detect", methods=["GET"])
 def detect():
-    df = pd.read_csv("data/network_logs.csv")
-
-    # Get last 10 logs (or however many you want)
-    recent = df.tail(10)
-
     results = []
 
-    for _, row in recent.iterrows():
+    # Balanced distribution: normal 60%, scan 20%, ddos 10%, brute 10%
+    LABELS = ["normal", "port_scan", "ddos", "brute_force"]
+    WEIGHTS = [0.6, 0.2, 0.1, 0.1]
+
+    for _ in range(10):  # generate 10 new logs each refresh
+        src_ip = fake.ipv4()
+        dst_port = random.choice([22, 80, 443, 8080, 53])
+        packet_size = random.randint(60, 1500)
+        protocol = random.choice(["TCP", "UDP"])
+        threat = random.choices(LABELS, weights=WEIGHTS)[0]
+
+        # Encode protocol
+        proto_enc = encoder.transform([protocol])[0]
+
         X = [[
-            ip_hash(row["src_ip"]),
-            row["dst_port"],
-            row["packet_size"],
-            encoder.transform([row["protocol"]])[0]
+            ip_hash(src_ip),
+            dst_port,
+            packet_size,
+            proto_enc
         ]]
 
         pred = model.predict(X)[0]
         conf = model.predict_proba(X).max()
 
         results.append({
-            "ip": row["src_ip"],
+            "ip": src_ip,
             "threat": pred,
             "confidence": float(conf),
-            "time": row["time"]
+            "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         })
 
     return jsonify(results)
+
 
 
 if __name__ == "__main__":
