@@ -59,6 +59,10 @@ public class DashboardUI extends JFrame {
         tableScroll.setBorder(BorderFactory.createTitledBorder("Network Map"));
 
         add(tableScroll, BorderLayout.CENTER);
+
+        TimeSeriesPanel timePanel = new TimeSeriesPanel();
+        add(timePanel, BorderLayout.SOUTH);
+
     }
 
     public void startThreatFetcher() {
@@ -125,4 +129,9 @@ public class DashboardUI extends JFrame {
     public void updatePie(String threat) {
         piePanel.increment(threat);
     }
+
+    public void updateTimeSeries(String threat) {
+    timePanel.updateSeries(threat);
+    }
+
 }
