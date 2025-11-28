@@ -9,9 +9,12 @@ import java.awt.Insets;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
@@ -36,22 +39,25 @@ public class DashboardUI extends JFrame {
         gbc.insets = new Insets(8, 8, 8, 8);
         gbc.fill = GridBagConstraints.BOTH;
 
-        // Header
-        JPanel topBar = new JPanel(new BorderLayout());
+        // Top Bar
+        JPanel top = new JPanel(new BorderLayout());
         JLabel header = new JLabel("AI-Powered Threat Dashboard", JLabel.CENTER);
         header.setFont(new Font("Segoe UI", Font.BOLD, 28));
-        topBar.add(header, BorderLayout.CENTER);
+        top.add(header, BorderLayout.CENTER);
 
         JButton trainBtn = new JButton("Retrain AI Model");
-        trainBtn.setPreferredSize(new Dimension(160, 35));
-        topBar.add(trainBtn, BorderLayout.EAST);
+        trainBtn.setPreferredSize(new Dimension(160, 38));
+        top.add(trainBtn, BorderLayout.EAST);
+
+        // AI Retrain action
+        trainBtn.addActionListener(e -> retrainAI());
 
         gbc.gridx = 0; gbc.gridy = 0;
         gbc.gridwidth = 3;
         gbc.weightx = 1; gbc.weighty = 0.05;
-        add(topBar, gbc);
+        add(top, gbc);
 
-        // Alerts
+        // Alerts Panel
         alertArea = new JTextArea();
         alertArea.setEditable(false);
         JScrollPane alertScroll = new JScrollPane(alertArea);
@@ -62,17 +68,19 @@ public class DashboardUI extends JFrame {
         gbc.weightx = 0.25; gbc.weighty = 0.40;
         add(alertScroll, gbc);
 
-        // Pie Chart
+        // Pie Panel
         piePanel = new PieChartPanel();
         piePanel.setBorder(BorderFactory.createTitledBorder("Attack Statistics"));
+
         gbc.gridx = 1; gbc.gridy = 1;
         gbc.weightx = 0.35;
         add(piePanel, gbc);
 
-        // Table
+        // Network Table
         String[] cols = {"IP", "Threat", "Confidence", "Time"};
         table = new JTable(new DefaultTableModel(cols, 0));
         table.setRowHeight(24);
+
         JScrollPane tableScroll = new JScrollPane(table);
         tableScroll.setBorder(BorderFactory.createTitledBorder("Network Map"));
 
@@ -89,24 +97,56 @@ public class DashboardUI extends JFrame {
         gbc.weightx = 1; gbc.weighty = 0.50;
         add(timePanel, gbc);
 
+        // Start Live Fetch
         new ThreatFetcher(this).start();
     }
 
-    public void addAlert(String threat, String ip, double conf, String time) {
-        alertArea.append(time + " → [" + threat + "] " + ip +
-                " | conf=" + conf + "\n");
+    private void retrainAI() {
+        JDialog dialog = new JDialog(this, "Retraining Model...", true);
+        dialog.setSize(400, 120);
+        dialog.setLocationRelativeTo(this);
+
+        JProgressBar bar = new JProgressBar();
+        bar.setIndeterminate(true);
+        dialog.add(bar);
+
+        new Thread(() -> {
+            try {
+                ProcessBuilder pb = new ProcessBuilder(
+                    "/home/khushigoel/Desktop/Threat Detection Private Repo /threat_detection_cybersecurity/.venv/bin/python3",
+                    "/home/khushigoel/Desktop/Threat Detection Private Repo /threat_detection_cybersecurity/train_model.py"
+                );
+
+                pb.redirectErrorStream(true);
+                pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+                pb.start().waitFor();
+
+                dialog.dispose();
+                JOptionPane.showMessageDialog(this, "AI Model retrained successfully!");
+
+            } catch (Exception ex) {
+                dialog.dispose();
+                JOptionPane.showMessageDialog(this, "Training failed: " + ex.getMessage());
+            }
+        }).start();
+
+        dialog.setVisible(true);
     }
 
-    public void addTableRow(String ip, String threat, double conf, String time) {
-        DefaultTableModel model = (DefaultTableModel) table.getModel();
-        model.addRow(new Object[]{ip, threat, conf, time});
+    public void addAlert(String t, String ip, double conf, String time) {
+        alertArea.append(time + "  [" + t + "] " + ip + " | conf=" + conf + "\n");
+    }
+
+    public void addTableRow(String ip, String t, double conf, String time) {
+        DefaultTableModel m = (DefaultTableModel) table.getModel();
+        m.addRow(new Object[]{ip, t, conf, time});
     }
 
     public void updatePie(String t) {
         piePanel.increment(t);
     }
 
-    public void updateTimeSeries(int count) {
-        timePanel.updateSeries(count);
+    public void updateTimeSeries(int value) {
+        timePanel.updateSeries(value);
     }
 }
