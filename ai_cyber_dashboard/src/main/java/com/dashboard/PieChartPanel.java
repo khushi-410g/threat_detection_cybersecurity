@@ -1,88 +1,76 @@
 package com.dashboard;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.JPanel;
 
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
+import org.jfree.chart.plot.PiePlot;
+import org.jfree.data.general.DefaultPieDataset;
+
 public class PieChartPanel extends JPanel {
 
-    private HashMap<String, Integer> attackCounts;
+    private DefaultPieDataset dataset;
+    private Map<String, Integer> counter;
 
     public PieChartPanel() {
-        attackCounts = new HashMap<>();
-        setPreferredSize(new Dimension(450, 300));
-        setBackground(new Color(45, 45, 45));  // soft academic dark
+
+        counter = new HashMap<>();
+        counter.put("normal", 1);
+        counter.put("port_scan", 1);
+        counter.put("ddos", 1);
+        counter.put("brute_force", 1);
+
+        dataset = new DefaultPieDataset();
+        updateDataset();
+
+        JFreeChart chart = ChartFactory.createPieChart(
+                "Threat Distribution",
+                dataset,
+                true, // legend
+                true,
+                false
+        );
+
+        PiePlot plot = (PiePlot) chart.getPlot();
+        plot.setBackgroundPaint(new Color(240, 240, 240));
+        plot.setOutlineVisible(false);
+
+        // ⭐ ORIGINAL ACADEMIC COLORS
+        plot.setSectionPaint("normal",      new Color(100, 180, 100));
+        plot.setSectionPaint("port_scan",   new Color(255, 200, 120));
+        plot.setSectionPaint("ddos",        new Color(255, 120, 120));
+        plot.setSectionPaint("brute_force", new Color(255, 80, 80));
+
+        plot.setLabelBackgroundPaint(Color.WHITE);
+        plot.setLabelFont(new Font("Segoe UI", Font.PLAIN, 12));
+        plot.setSimpleLabels(true);
+
+        plot.setLabelGenerator(new StandardPieSectionLabelGenerator("{0}: {1}"));
+
+        ChartPanel chartPanel = new ChartPanel(chart);
+        chartPanel.setMouseWheelEnabled(true);
+        add(chartPanel);
     }
 
-    public void updateCount(String attackType) {
-        attackCounts.put(attackType, attackCounts.getOrDefault(attackType, 0) + 1);
+    private void updateDataset() {
+        dataset.setValue("normal", counter.get("normal"));
+        dataset.setValue("port_scan", counter.get("port_scan"));
+        dataset.setValue("ddos", counter.get("ddos"));
+        dataset.setValue("brute_force", counter.get("brute_force"));
+    }
+
+    public void increment(String threat) {
+        if (!counter.containsKey(threat)) return;
+
+        counter.put(threat, counter.get(threat) + 1);
+        updateDataset();
         repaint();
-    }
-
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        drawPieChart((Graphics2D) g);
-    }
-
-    private void drawPieChart(Graphics2D g) {
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-        int total = attackCounts.values().stream().mapToInt(Integer::intValue).sum();
-        if (total == 0)
-            return;
-
-        // --- Academic theme colors (matching original screenshot) ---
-        Color normal = new Color(255, 91, 91);     // red
-        Color portScan = new Color(66, 135, 245);  // blue
-        Color ddos = new Color(255, 235, 59);      // yellow
-        Color brute = new Color(76, 175, 80);      // green
-
-        HashMap<String, Color> colorMap = new HashMap<>();
-        colorMap.put("normal", normal);
-        colorMap.put("port_scan", portScan);
-        colorMap.put("ddos", ddos);
-        colorMap.put("brute_force", brute);
-
-        int x = 30, y = 20, width = 270, height = 270;
-
-        int startAngle = 0;
-        for (String key : attackCounts.keySet()) {
-            int value = attackCounts.get(key);
-            int angle = (int) Math.round((value * 360.0) / total);
-
-            g.setColor(colorMap.getOrDefault(key, Color.GRAY));
-            g.fillArc(x, y, width, height, startAngle, angle);
-
-            startAngle += angle;
-        }
-
-        // Draw labels
-        int legendX = 330;
-        int legendY = 60;
-
-        g.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        g.setColor(Color.WHITE);
-
-        for (String key : attackCounts.keySet()) {
-            g.setColor(colorMap.getOrDefault(key, Color.GRAY));
-            g.fillRect(legendX, legendY, 18, 18);
-
-            g.setColor(Color.WHITE);
-            g.drawString(key + " (" + attackCounts.get(key) + ")", legendX + 28, legendY + 15);
-
-            legendY += 30;
-        }
-
-        // Title
-        g.setColor(Color.WHITE);
-        g.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        g.drawString("Attack Types", 150, 15);
     }
 }

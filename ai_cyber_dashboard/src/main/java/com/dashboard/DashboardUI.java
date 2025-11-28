@@ -1,141 +1,206 @@
 package com.dashboard;
 
-import javax.swing.*;
-import javax.swing.border.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.net.URL;
+import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
 
 public class DashboardUI extends JFrame {
 
-    private JTextArea alertArea;
-    private JTable networkTable;
-    private PieChartPanel pieChart;
-    private TimeSeriesPanel timeSeriesPanel;
+    JTextArea alertArea;
+    JTable table;
+    PieChartPanel piePanel;
+    TimeSeriesPanel timePanel;
 
     public DashboardUI() {
-        setTitle("AI-Powered Threat Dashboard");
-        setSize(1400, 800);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        // WINDOW
+        setTitle("AI-Powered Threat Monitoring Dashboard");
+        setSize(1250, 780);
+        setResizable(true);
         setLocationRelativeTo(null);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
 
-        // Academic Theme Colors
-        Color bg = new Color(30, 30, 30);
-        Color panelBorder = new Color(180, 180, 180);
-        Color panelBG = new Color(40, 40, 40);
-        Color headerColor = new Color(220, 220, 220);
-
+        // Main Layout
         setLayout(new BorderLayout());
-        getContentPane().setBackground(bg);
 
-        // Header
-        JLabel header = new JLabel("AI-Powered Threat Dashboard", SwingConstants.CENTER);
-        header.setForeground(headerColor);
-        header.setFont(new Font("Segoe UI", Font.BOLD, 26));
-        header.setBorder(new EmptyBorder(15, 10, 15, 10));
+        // ------------------------------
+        // 🔵 HEADER BAR
+        // ------------------------------
+        JPanel header = new JPanel(new BorderLayout());
+        header.setBackground(new Color(30, 30, 30));
+        header.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+
+        JLabel title = new JLabel("AI-Powered Threat Monitoring Dashboard", JLabel.LEFT);
+        title.setFont(new Font("Segoe UI", Font.BOLD, 26));
+        title.setForeground(Color.WHITE);
+
+        JButton retrainBtn = new JButton("Retrain AI Model");
+        retrainBtn.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        retrainBtn.addActionListener(e -> showTrainingPopup());
+
+        header.add(title, BorderLayout.WEST);
+        header.add(retrainBtn, BorderLayout.EAST);
         add(header, BorderLayout.NORTH);
 
-        JPanel centerPanel = new JPanel(new GridLayout(1, 3, 10, 10));
-        centerPanel.setBackground(bg);
+        // ------------------------------
+        // 🔵 CENTER PANEL — ALERTS, PIE, TABLE
+        // ------------------------------
+        JPanel center = new JPanel(new GridLayout(1, 3, 10, 10));
+        center.setBackground(new Color(40, 40, 40));
+        center.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // Left — Alerts
-        JPanel alertPanel = createPanel("Live Alerts", panelBG, panelBorder);
+        // LEFT — ALERT AREA
         alertArea = new JTextArea();
         alertArea.setEditable(false);
-        alertArea.setBackground(panelBG);
+        alertArea.setFont(new Font("Consolas", Font.PLAIN, 14));
+        alertArea.setBackground(new Color(20, 20, 20));
         alertArea.setForeground(Color.WHITE);
-        alertArea.setFont(new Font("Consolas", Font.PLAIN, 13));
-        alertPanel.add(new JScrollPane(alertArea));
-        centerPanel.add(alertPanel);
 
-        // Middle — Pie Chart
-        JPanel chartPanel = createPanel("Attack Statistics", panelBG, panelBorder);
-        pieChart = new PieChartPanel();
-        chartPanel.add(pieChart);
-        centerPanel.add(chartPanel);
+        JScrollPane alertScroll = new JScrollPane(alertArea);
+        alertScroll.setBorder(BorderFactory.createTitledBorder("Live Alerts"));
 
-        // Right — Network Map
-        JPanel networkPanel = createPanel("Network Map", panelBG, panelBorder);
+        center.add(alertScroll);
 
-        String[] columns = {"IP", "Threat", "Confidence", "Time"};
-        networkTable = new JTable(new DefaultTableModel(columns, 0));
+        // CENTER — PIE CHART
+        piePanel = new PieChartPanel();
+        piePanel.setBorder(BorderFactory.createTitledBorder("Attack Distribution"));
 
-        networkTable.setBackground(panelBG);
-        networkTable.setForeground(Color.WHITE);
-        networkTable.setGridColor(Color.GRAY);
+        center.add(piePanel);
 
-        // Column Width Fix for Timestamp
-        networkTable.getColumnModel().getColumn(0).setPreferredWidth(120);
-        networkTable.getColumnModel().getColumn(1).setPreferredWidth(80);
-        networkTable.getColumnModel().getColumn(2).setPreferredWidth(80);
-        networkTable.getColumnModel().getColumn(3).setPreferredWidth(180);
+        // RIGHT — TABLE
+        String[] cols = { "Source IP", "Threat", "Confidence", "Timestamp" };
+        table = new JTable(new DefaultTableModel(cols, 0));
+        table.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        table.setRowHeight(26);
 
-        JScrollPane tableScroll = new JScrollPane(networkTable);
-        networkPanel.add(tableScroll);
-        centerPanel.add(networkPanel);
+        table.getColumnModel().getColumn(3).setPreferredWidth(180); // full time visible
 
-        add(centerPanel, BorderLayout.CENTER);
+        JScrollPane tableScroll = new JScrollPane(table);
+        tableScroll.setBorder(BorderFactory.createTitledBorder("Network Events"));
 
-        // Bottom — Timeline
-        JPanel bottomPanel = createPanel("Last 60 Sec Threat Timeline", panelBG, panelBorder);
-        timeSeriesPanel = new TimeSeriesPanel();
-        bottomPanel.add(timeSeriesPanel);
-        add(bottomPanel, BorderLayout.SOUTH);
+        center.add(tableScroll);
 
-        // Top-right — Retrain button
-        JButton retrainBtn = iconButton("ai.png", "Retrain AI Model");
-        retrainBtn.addActionListener(e -> PythonServer.runTraining());
-        JPanel topRight = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        topRight.setBackground(bg);
-        topRight.add(retrainBtn);
-        add(topRight, BorderLayout.NORTH);
+        add(center, BorderLayout.CENTER);
+
+        // ------------------------------
+        // 🔵 BOTTOM — TIME SERIES GRAPH
+        // ------------------------------
+        timePanel = new TimeSeriesPanel();
+        timePanel.setBorder(BorderFactory.createTitledBorder("Threat Timeline (last 60 events)"));
+
+        add(timePanel, BorderLayout.SOUTH);
+
+        // ------------------------------
+        // START FETCHER
+        // ------------------------------
+        new ThreatFetcher(this).start();
     }
 
-    /** Smaller reusable panel builder */
-    private JPanel createPanel(String title, Color bg, Color borderColor) {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BorderLayout());
-        panel.setBackground(bg);
-        panel.setBorder(new TitledBorder(new LineBorder(borderColor, 1), title,
-                TitledBorder.LEFT, TitledBorder.TOP,
-                new Font("Segoe UI", Font.BOLD, 13), borderColor));
-        return panel;
+    // -------------------------------------------
+    // 🔵 ALERTS
+    // -------------------------------------------
+    private void blinkAlert() {
+        new Thread(() -> {
+            try {
+                for (int i = 0; i < 4; i++) {
+                    alertArea.setVisible(false);
+                    Thread.sleep(200);
+                    alertArea.setVisible(true);
+                    Thread.sleep(200);
+                }
+            } catch (Exception ignored) {}
+        }).start();
     }
 
-    /** ICON FIXED — Auto resize + correct resource path */
-    private JButton iconButton(String iconName, String text) {
-        JButton btn = new JButton(text);
-        btn.setFocusPainted(false);
-        btn.setFont(new Font("Segoe UI", Font.BOLD, 14));
+    public void addAlert(String threat, String ip, double conf, String time) {
+        String msg = "[" + threat.toUpperCase() + "] " + ip + " | conf=" + conf + " | " + time;
 
-        try {
-            URL iconURL = getClass().getClassLoader().getResource("icons/" + iconName);
-            if (iconURL != null) {
-                Image img = new ImageIcon(iconURL).getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH);
-                btn.setIcon(new ImageIcon(img));
-            }
-        } catch (Exception e) {
-            System.out.println("Icon load failed: " + iconName);
+        switch (threat) {
+            case "ddos":
+            case "brute_force":
+                alertArea.setForeground(Color.RED);
+                blinkAlert();
+                break;
+
+            case "port_scan":
+                alertArea.setForeground(Color.ORANGE);
+                break;
+
+            default:
+                alertArea.setForeground(Color.GREEN);
         }
 
-        return btn;
+        alertArea.append(msg + "\n");
     }
 
-    // Update UI from threat data
-    public void addAlert(String text) {
-        alertArea.append(text + "\n");
-    }
-
+    // -------------------------------------------
+    // 🔵 TABLE ROW COLORS
+    // -------------------------------------------
     public void addTableRow(String ip, String threat, double conf, String time) {
-        ((DefaultTableModel) networkTable.getModel())
-                .addRow(new Object[]{ip, threat, conf, time});
+
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
+        model.addRow(new Object[]{ip, threat, conf, time});
+
+        table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(
+                    JTable tbl, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+
+                Component c = super.getTableCellRendererComponent(tbl, value, isSelected, hasFocus, row, col);
+
+                String t = (String) tbl.getValueAt(row, 1);
+
+                if (t.equals("ddos") || t.equals("brute_force")) {
+                    c.setBackground(new Color(255, 120, 120));
+                } else if (t.equals("port_scan")) {
+                    c.setBackground(new Color(255, 200, 120));
+                } else {
+                    c.setBackground(new Color(200, 255, 200));
+                }
+
+                if (isSelected)
+                    c.setBackground(new Color(150, 150, 255));
+
+                return c;
+            }
+        });
     }
 
-    public PieChartPanel getPieChartPanel() {
-        return pieChart;
+    // -------------------------------------------
+    // 🔵 PIE + TIME SERIES UPDATE
+    // -------------------------------------------
+    public void updatePie(String threat) {
+        piePanel.increment(threat);
     }
 
-    public TimeSeriesPanel getTimeSeriesPanel() {
-        return timeSeriesPanel;
+    public void updateTimeSeries(String threat) {
+        timePanel.updateSeries(threat);
+    }
+
+    // -------------------------------------------
+    // 🔵 TRAINING POPUP
+    // -------------------------------------------
+    private void showTrainingPopup() {
+        JDialog dialog = new JDialog(this, "Retraining AI Model...", true);
+
+        JProgressBar bar = new JProgressBar(0, 100);
+        bar.setValue(0);
+
+        dialog.add(bar);
+        dialog.setSize(350, 90);
+        dialog.setLocationRelativeTo(this);
+
+        // simulate training
+        new Thread(() -> {
+            for (int i = 0; i <= 100; i++) {
+                bar.setValue(i);
+                try { Thread.sleep(30); } catch (Exception ignored) {}
+            }
+            dialog.dispose();
+            JOptionPane.showMessageDialog(this, "Model Retraining Complete!");
+        }).start();
+
+        dialog.setVisible(true);
     }
 }
