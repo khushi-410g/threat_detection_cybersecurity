@@ -1,152 +1,141 @@
 package com.dashboard;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextArea;
+import javax.swing.*;
+import javax.swing.border.*;
 import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.net.URL;
 
 public class DashboardUI extends JFrame {
 
-    JTextArea alertArea;
-    JTable table;
-    PieChartPanel piePanel;
-    TimeSeriesPanel timePanel;
+    private JTextArea alertArea;
+    private JTable networkTable;
+    private PieChartPanel pieChart;
+    private TimeSeriesPanel timeSeriesPanel;
 
     public DashboardUI() {
-
         setTitle("AI-Powered Threat Dashboard");
-        setSize(1300, 850);
+        setSize(1400, 800);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLayout(new GridBagLayout());
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(8, 8, 8, 8);
-        gbc.fill = GridBagConstraints.BOTH;
+        // Academic Theme Colors
+        Color bg = new Color(30, 30, 30);
+        Color panelBorder = new Color(180, 180, 180);
+        Color panelBG = new Color(40, 40, 40);
+        Color headerColor = new Color(220, 220, 220);
 
-        // Top Bar
-        JPanel top = new JPanel(new BorderLayout());
-        JLabel header = new JLabel("AI-Powered Threat Dashboard", JLabel.CENTER);
-        header.setFont(new Font("Segoe UI", Font.BOLD, 28));
-        top.add(header, BorderLayout.CENTER);
+        setLayout(new BorderLayout());
+        getContentPane().setBackground(bg);
 
-        JButton trainBtn = new JButton("Retrain AI Model");
-        trainBtn.setPreferredSize(new Dimension(160, 38));
-        top.add(trainBtn, BorderLayout.EAST);
+        // Header
+        JLabel header = new JLabel("AI-Powered Threat Dashboard", SwingConstants.CENTER);
+        header.setForeground(headerColor);
+        header.setFont(new Font("Segoe UI", Font.BOLD, 26));
+        header.setBorder(new EmptyBorder(15, 10, 15, 10));
+        add(header, BorderLayout.NORTH);
 
-        // AI Retrain action
-        trainBtn.addActionListener(e -> retrainAI());
+        JPanel centerPanel = new JPanel(new GridLayout(1, 3, 10, 10));
+        centerPanel.setBackground(bg);
 
-        gbc.gridx = 0; gbc.gridy = 0;
-        gbc.gridwidth = 3;
-        gbc.weightx = 1; gbc.weighty = 0.05;
-        add(top, gbc);
-
-        // Alerts Panel
+        // Left — Alerts
+        JPanel alertPanel = createPanel("Live Alerts", panelBG, panelBorder);
         alertArea = new JTextArea();
         alertArea.setEditable(false);
-        JScrollPane alertScroll = new JScrollPane(alertArea);
-        alertScroll.setBorder(BorderFactory.createTitledBorder("Live Alerts"));
+        alertArea.setBackground(panelBG);
+        alertArea.setForeground(Color.WHITE);
+        alertArea.setFont(new Font("Consolas", Font.PLAIN, 13));
+        alertPanel.add(new JScrollPane(alertArea));
+        centerPanel.add(alertPanel);
 
-        gbc.gridx = 0; gbc.gridy = 1;
-        gbc.gridwidth = 1;
-        gbc.weightx = 0.25; gbc.weighty = 0.40;
-        add(alertScroll, gbc);
+        // Middle — Pie Chart
+        JPanel chartPanel = createPanel("Attack Statistics", panelBG, panelBorder);
+        pieChart = new PieChartPanel();
+        chartPanel.add(pieChart);
+        centerPanel.add(chartPanel);
 
-        // Pie Panel
-        piePanel = new PieChartPanel();
-        piePanel.setBorder(BorderFactory.createTitledBorder("Attack Statistics"));
+        // Right — Network Map
+        JPanel networkPanel = createPanel("Network Map", panelBG, panelBorder);
 
-        gbc.gridx = 1; gbc.gridy = 1;
-        gbc.weightx = 0.35;
-        add(piePanel, gbc);
+        String[] columns = {"IP", "Threat", "Confidence", "Time"};
+        networkTable = new JTable(new DefaultTableModel(columns, 0));
 
-        // Network Table
-        String[] cols = {"IP", "Threat", "Confidence", "Time"};
-        table = new JTable(new DefaultTableModel(cols, 0));
-        table.setRowHeight(24);
+        networkTable.setBackground(panelBG);
+        networkTable.setForeground(Color.WHITE);
+        networkTable.setGridColor(Color.GRAY);
 
-        JScrollPane tableScroll = new JScrollPane(table);
-        tableScroll.setBorder(BorderFactory.createTitledBorder("Network Map"));
+        // Column Width Fix for Timestamp
+        networkTable.getColumnModel().getColumn(0).setPreferredWidth(120);
+        networkTable.getColumnModel().getColumn(1).setPreferredWidth(80);
+        networkTable.getColumnModel().getColumn(2).setPreferredWidth(80);
+        networkTable.getColumnModel().getColumn(3).setPreferredWidth(180);
 
-        gbc.gridx = 2; gbc.gridy = 1;
-        gbc.weightx = 0.40;
-        add(tableScroll, gbc);
+        JScrollPane tableScroll = new JScrollPane(networkTable);
+        networkPanel.add(tableScroll);
+        centerPanel.add(networkPanel);
 
-        // Time Series
-        timePanel = new TimeSeriesPanel();
-        timePanel.setBorder(BorderFactory.createTitledBorder("Last 60 Sec Threat Timeline"));
+        add(centerPanel, BorderLayout.CENTER);
 
-        gbc.gridx = 0; gbc.gridy = 2;
-        gbc.gridwidth = 3;
-        gbc.weightx = 1; gbc.weighty = 0.50;
-        add(timePanel, gbc);
+        // Bottom — Timeline
+        JPanel bottomPanel = createPanel("Last 60 Sec Threat Timeline", panelBG, panelBorder);
+        timeSeriesPanel = new TimeSeriesPanel();
+        bottomPanel.add(timeSeriesPanel);
+        add(bottomPanel, BorderLayout.SOUTH);
 
-        // Start Live Fetch
-        new ThreatFetcher(this).start();
+        // Top-right — Retrain button
+        JButton retrainBtn = iconButton("ai.png", "Retrain AI Model");
+        retrainBtn.addActionListener(e -> PythonServer.runTraining());
+        JPanel topRight = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        topRight.setBackground(bg);
+        topRight.add(retrainBtn);
+        add(topRight, BorderLayout.NORTH);
     }
 
-    private void retrainAI() {
-        JDialog dialog = new JDialog(this, "Retraining Model...", true);
-        dialog.setSize(400, 120);
-        dialog.setLocationRelativeTo(this);
+    /** Smaller reusable panel builder */
+    private JPanel createPanel(String title, Color bg, Color borderColor) {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BorderLayout());
+        panel.setBackground(bg);
+        panel.setBorder(new TitledBorder(new LineBorder(borderColor, 1), title,
+                TitledBorder.LEFT, TitledBorder.TOP,
+                new Font("Segoe UI", Font.BOLD, 13), borderColor));
+        return panel;
+    }
 
-        JProgressBar bar = new JProgressBar();
-        bar.setIndeterminate(true);
-        dialog.add(bar);
+    /** ICON FIXED — Auto resize + correct resource path */
+    private JButton iconButton(String iconName, String text) {
+        JButton btn = new JButton(text);
+        btn.setFocusPainted(false);
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 14));
 
-        new Thread(() -> {
-            try {
-                ProcessBuilder pb = new ProcessBuilder(
-                    "/home/khushigoel/Desktop/Threat Detection Private Repo /threat_detection_cybersecurity/.venv/bin/python3",
-                    "/home/khushigoel/Desktop/Threat Detection Private Repo /threat_detection_cybersecurity/train_model.py"
-                );
-
-                pb.redirectErrorStream(true);
-                pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
-                pb.start().waitFor();
-
-                dialog.dispose();
-                JOptionPane.showMessageDialog(this, "AI Model retrained successfully!");
-
-            } catch (Exception ex) {
-                dialog.dispose();
-                JOptionPane.showMessageDialog(this, "Training failed: " + ex.getMessage());
+        try {
+            URL iconURL = getClass().getClassLoader().getResource("icons/" + iconName);
+            if (iconURL != null) {
+                Image img = new ImageIcon(iconURL).getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH);
+                btn.setIcon(new ImageIcon(img));
             }
-        }).start();
+        } catch (Exception e) {
+            System.out.println("Icon load failed: " + iconName);
+        }
 
-        dialog.setVisible(true);
+        return btn;
     }
 
-    public void addAlert(String t, String ip, double conf, String time) {
-        alertArea.append(time + "  [" + t + "] " + ip + " | conf=" + conf + "\n");
+    // Update UI from threat data
+    public void addAlert(String text) {
+        alertArea.append(text + "\n");
     }
 
-    public void addTableRow(String ip, String t, double conf, String time) {
-        DefaultTableModel m = (DefaultTableModel) table.getModel();
-        m.addRow(new Object[]{ip, t, conf, time});
+    public void addTableRow(String ip, String threat, double conf, String time) {
+        ((DefaultTableModel) networkTable.getModel())
+                .addRow(new Object[]{ip, threat, conf, time});
     }
 
-    public void updatePie(String t) {
-        piePanel.increment(t);
+    public PieChartPanel getPieChartPanel() {
+        return pieChart;
     }
 
-    public void updateTimeSeries(int value) {
-        timePanel.updateSeries(value);
+    public TimeSeriesPanel getTimeSeriesPanel() {
+        return timeSeriesPanel;
     }
 }
