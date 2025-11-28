@@ -18,14 +18,14 @@ public class TimeSeriesPanel extends JPanel {
     private final TimeSeries series;
 
     public TimeSeriesPanel() {
-        series = new TimeSeries("Threats");
+        series = new TimeSeries("Threats per second");
 
         TimeSeriesCollection dataset = new TimeSeriesCollection(series);
 
         JFreeChart chart = ChartFactory.createTimeSeriesChart(
                 "Last 60 Sec Threat Timeline",
                 "Time",
-                "Threats",
+                "Threat Count",
                 dataset,
                 false, true, false
         );
@@ -41,7 +41,7 @@ public class TimeSeriesPanel extends JPanel {
         series.setMaximumItemCount(60);
     }
 
-    public void updateSeries(String threat) {
-        series.addOrUpdate(new Second(), 1);
+    public void updateSeries(int threats) {
+        series.addOrUpdate(new Second(), threats);
     }
 }
