@@ -1,6 +1,7 @@
 package com.dashboard;
 
 import java.io.File;
+import java.io.IOException;
 
 public class PythonServer {
 
@@ -27,7 +28,7 @@ public class PythonServer {
             Thread.sleep(2000);
 
             System.out.println("✅ Flask backend started!");
-        } catch (Exception e) {
+        } catch (IOException | InterruptedException e) {
             System.out.println("❌ Failed to start Flask backend: " + e.getMessage());
         }
     }
