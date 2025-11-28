@@ -9,27 +9,14 @@ public class PythonServer {
 
     public void startServer() {
         try {
-            String projectPath = "/home/khushigoel/Desktop/Threat Detection Private Repo /threat_detection_cybersecurity";
-            String pythonFile = projectPath + "/app/app.py";
-
-            ProcessBuilder pb = new ProcessBuilder("python3", pythonFile);
-            pb.directory(new File(projectPath));
-
+            ProcessBuilder pb = new ProcessBuilder("python3", "app/app.py");
+            pb.directory(new File("/home/khushigoel/Desktop/Threat Detection Private Repo /threat_detection_cybersecurity"));
             pb.redirectErrorStream(true);
             pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
-
             process = pb.start();
-            System.out.println("🔥 Flask backend started.");
-
+            System.out.println("Flask started.");
         } catch (IOException e) {
-            System.out.println("❌ Failed to start Flask: " + e.getMessage());
-        }
-    }
-
-    public void stopServer() {
-        if (process != null && process.isAlive()) {
-            process.destroy();
-            System.out.println("🛑 Flask backend stopped.");
+            System.out.println("Error starting Flask: " + e.getMessage());
         }
     }
 }
