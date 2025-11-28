@@ -1,18 +1,18 @@
 package com.dashboard;
 
-import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
@@ -25,22 +25,29 @@ public class DashboardUI extends JFrame {
     JTable table;
     PieChartPanel piePanel;
     TimeSeriesPanel timePanel;
-s
-
 
     public DashboardUI() {
         setTitle("AI-Powered Threat Dashboard");
-        setSize(1000, 700);
+        setSize(1200, 750);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-
         setLayout(new BorderLayout());
+
+        // ---------------- TOP BAR ----------------
+        JPanel topPanel = new JPanel(new BorderLayout());
 
         JLabel header = new JLabel("AI-Powered Threat Dashboard", JLabel.CENTER);
         header.setFont(new Font("Verdana", Font.BOLD, 26));
-        add(header, BorderLayout.NORTH);
 
-        // LEFT SIDE: Alerts + Pie Chart
+        JButton trainBtn = new JButton("Retrain AI Model");
+        trainBtn.addActionListener(e -> showTrainingPopup());
+
+        topPanel.add(header, BorderLayout.CENTER);
+        topPanel.add(trainBtn, BorderLayout.EAST);
+
+        add(topPanel, BorderLayout.NORTH);
+
+        // ---------------- LEFT SIDE ----------------
         JPanel leftPanel = new JPanel(new BorderLayout());
 
         alertArea = new JTextArea();
@@ -56,86 +63,124 @@ s
 
         add(leftPanel, BorderLayout.WEST);
 
-        // RIGHT SIDE: Network Map Table
+        // ---------------- CENTER TABLE ----------------
         String[] cols = {"IP", "Threat", "Confidence", "Time"};
         table = new JTable(new DefaultTableModel(cols, 0));
+
         JScrollPane tableScroll = new JScrollPane(table);
         tableScroll.setBorder(BorderFactory.createTitledBorder("Network Map"));
 
         add(tableScroll, BorderLayout.CENTER);
 
-        TimeSeriesPanel timePanel = new TimeSeriesPanel();
+        // ---------------- BOTTOM TIME-SERIES CHART ----------------
+        timePanel = new TimeSeriesPanel();   // FIXED: Assign correctly
         add(timePanel, BorderLayout.SOUTH);
-
     }
 
+    // --------------------------------------------------------------
+    // START FETCHER
+    // --------------------------------------------------------------
     public void startThreatFetcher() {
-        // Start fetching threats
         new ThreatFetcher(this).start();
     }
 
+    // --------------------------------------------------------------
+    // BLINK ALERT METHOD
+    // --------------------------------------------------------------
     private void blinkAlert() {
-    new Thread(() -> {
-        try {
-            for (int i = 0; i < 4; i++) {
-                alertArea.setVisible(false);
-                Thread.sleep(200);
-                alertArea.setVisible(true);
-                Thread.sleep(200);
+        new Thread(() -> {
+            try {
+                for (int i = 0; i < 4; i++) {
+                    alertArea.setVisible(false);
+                    Thread.sleep(200);
+                    alertArea.setVisible(true);
+                    Thread.sleep(200);
                 }
             } catch (Exception ignored) {}
         }).start();
     }
 
-
+    // --------------------------------------------------------------
+    // ADD ALERT (COLOR CODED)
+    // --------------------------------------------------------------
     public void addAlert(String threat, String ip, double conf) {
-    String msg = "[" + threat + "] from " + ip + " | Conf=" + conf;
+        String msg = "[" + threat + "] from " + ip + " | Conf=" + conf;
 
-    if (threat.equals("ddos") || threat.equals("brute_force")) {
-        // High severity → blinking red
-        alertArea.setForeground(Color.RED);
-        blinkAlert();
-    } else if (threat.equals("port_scan")) {
-        alertArea.setForeground(Color.ORANGE);
-    } else {
-        alertArea.setForeground(Color.GREEN);
+        if (threat.equals("ddos") || threat.equals("brute_force")) {
+            alertArea.setForeground(Color.RED);
+            blinkAlert();
+        } else if (threat.equals("port_scan")) {
+            alertArea.setForeground(Color.ORANGE);
+        } else {
+            alertArea.setForeground(Color.GREEN);
+        }
+
+        alertArea.append(msg + "\n");
     }
 
-    alertArea.append(msg + "\n");
-   }
+    // --------------------------------------------------------------
+    // ADD TABLE ROW WITH COLOR
+    // --------------------------------------------------------------
+    public void addTableRow(String ip, String threat, double conf, String time) {
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
+        model.addRow(new Object[]{ip, threat, conf, time});
 
+        table.setDefaultRenderer(Object.class, (tbl, value, isSelected, hasFocus, row, col) -> {
+            Component c = new DefaultTableCellRenderer().getTableCellRendererComponent(
+                    tbl, value, isSelected, hasFocus, row, col
+            );
 
-   public void addTableRow(String ip, String threat, double conf, String time) {
+            String t = (String) tbl.getValueAt(row, 1);
 
-    DefaultTableModel model = (DefaultTableModel) table.getModel();
-    model.addRow(new Object[]{ip, threat, conf, time});
+            if (t.equals("ddos") || t.equals("brute_force"))
+                c.setBackground(new Color(255, 80, 80));
+            else if (t.equals("port_scan"))
+                c.setBackground(new Color(255, 180, 80));
+            else
+                c.setBackground(new Color(120, 255, 120));
 
-    table.setDefaultRenderer(Object.class, (tbl, value, isSelected, hasFocus, row, col) -> {
-        Component c = new DefaultTableCellRenderer().getTableCellRendererComponent(
-                tbl, value, isSelected, hasFocus, row, col
-        );
-
-        String t = (String) tbl.getValueAt(row, 1); // threat column
-
-        if (t.equals("ddos") || t.equals("brute_force"))
-            c.setBackground(new Color(255, 80, 80));   // red
-        else if (t.equals("port_scan"))
-            c.setBackground(new Color(255, 180, 80)); // orange
-        else
-            c.setBackground(new Color(120, 255, 120)); // green
-
-        return c;
+            return c;
         });
     }
 
-
-
+    // --------------------------------------------------------------
+    // UPDATE PIE CHART
+    // --------------------------------------------------------------
     public void updatePie(String threat) {
         piePanel.increment(threat);
     }
 
+    // --------------------------------------------------------------
+    // UPDATE TIME SERIES CHART
+    // --------------------------------------------------------------
     public void updateTimeSeries(String threat) {
-    timePanel.updateSeries(threat);
+        timePanel.updateSeries(threat);
     }
 
+    // --------------------------------------------------------------
+    // AI TRAINING POPUP
+    // --------------------------------------------------------------
+    private void showTrainingPopup() {
+        JDialog dialog = new JDialog(this, "AI Model Training", true);
+        JProgressBar bar = new JProgressBar();
+
+        bar.setMinimum(0);
+        bar.setMaximum(100);
+        bar.setValue(0);
+
+        dialog.add(bar);
+        dialog.setSize(300, 80);
+        dialog.setLocationRelativeTo(this);
+
+        new Thread(() -> {
+            for (int i = 0; i <= 100; i++) {
+                bar.setValue(i);
+                try { Thread.sleep(30); } catch (Exception ignored) {}
+            }
+            dialog.dispose();
+            JOptionPane.showMessageDialog(this, "AI Retraining Complete!");
+        }).start();
+
+        dialog.setVisible(true);
+    }
 }
