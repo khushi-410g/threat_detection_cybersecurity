@@ -1,6 +1,7 @@
 package com.dashboard;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Font;
 
 import javax.swing.BorderFactory;
@@ -60,9 +61,36 @@ public class DashboardUI extends JFrame {
         new ThreatFetcher(this).start();
     }
 
-    public void addAlert(String text) {
-        alertArea.append(text + "\n");
+    private void blinkAlert() {
+    new Thread(() -> {
+        try {
+            for (int i = 0; i < 4; i++) {
+                alertArea.setVisible(false);
+                Thread.sleep(200);
+                alertArea.setVisible(true);
+                Thread.sleep(200);
+                }
+            } catch (Exception ignored) {}
+        }).start();
     }
+
+
+    public void addAlert(String threat, String ip, double conf) {
+    String msg = "[" + threat + "] from " + ip + " | Conf=" + conf;
+
+    if (threat.equals("ddos") || threat.equals("brute_force")) {
+        // High severity → blinking red
+        alertArea.setForeground(Color.RED);
+        blinkAlert();
+    } else if (threat.equals("port_scan")) {
+        alertArea.setForeground(Color.ORANGE);
+    } else {
+        alertArea.setForeground(Color.GREEN);
+    }
+
+    alertArea.append(msg + "\n");
+   }
+
 
     public void addTableRow(String ip, String threat, double conf, String time) {
     DefaultTableModel model = (DefaultTableModel) table.getModel();
