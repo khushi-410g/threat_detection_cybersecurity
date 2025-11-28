@@ -1,10 +1,12 @@
 package com.dashboard;
 
-import javax.swing.Timer;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
+import javax.swing.Timer;
+
 import org.json.JSONObject;
 
 public class ThreatFetcher {
@@ -28,13 +30,19 @@ public class ThreatFetcher {
         double conf = obj.getDouble("confidence");
         String time = obj.getString("time");
 
-        // Update UI panels
         ui.addAlert(threat, ip, conf, time);
         ui.addTableRow(ip, threat, conf, time);
         ui.updatePie(threat);
 
-        // Graph now receives 1 threat per fetch
-        ui.updateTimeSeries(1);
+        // Severity-based graph spike
+        int value = switch (threat) {
+            case "port_scan" -> 1;
+            case "brute_force" -> 2;
+            case "ddos" -> 3;
+            default -> 0;
+        };
+
+        ui.updateTimeSeries(value);
     }
 
     private JSONObject fetchThreat() {
@@ -45,7 +53,7 @@ public class ThreatFetcher {
             conn.setRequestMethod("GET");
 
             BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(conn.getInputStream())
+                new InputStreamReader(conn.getInputStream())
             );
 
             StringBuilder sb = new StringBuilder();
