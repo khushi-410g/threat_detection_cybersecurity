@@ -20,6 +20,9 @@ public class DashboardUI extends JFrame {
     JTextArea alertArea;
     JTable table;
     PieChartPanel piePanel;
+    TimeSeriesPanel timePanel;
+
+
 
     public DashboardUI() {
         setTitle("AI-Powered Threat Dashboard");
