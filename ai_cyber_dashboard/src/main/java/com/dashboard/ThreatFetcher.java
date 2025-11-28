@@ -38,7 +38,7 @@ public class ThreatFetcher {
             String ip = data.getString("ip");
             String time = data.getString("time");
 
-            ui.addAlert("[" + threat + "] from " + ip + " | Conf=" + conf);
+            ui.addAlert(threat, ip, conf);
             ui.addTableRow(ip, threat, conf, time);
             ui.updatePie(threat);
         }
