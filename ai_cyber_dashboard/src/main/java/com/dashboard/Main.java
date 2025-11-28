@@ -8,7 +8,7 @@ public class Main {
 
         FlatDarculaLaf.setup();
 
-        //  Start Flask Backend Automatically
+        // Start Flask Backend Automatically
         PythonServer server = new PythonServer();
         server.startServer();
 
