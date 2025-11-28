@@ -1,7 +1,6 @@
+com/dashboard/PieChartPanel.class
 com/dashboard/PythonServer.class
 com/dashboard/DashboardUI.class
-com/dashboard/DashboardUI$1.class
-com/dashboard/PieChartPanel.class
 com/dashboard/ThreatFetcher.class
 com/dashboard/TimeSeriesPanel.class
 com/dashboard/Main.class
