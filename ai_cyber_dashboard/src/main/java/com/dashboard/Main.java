@@ -15,7 +15,9 @@ public class Main {
         // 2️⃣ Start Dashboard UI
         DashboardUI ui = new DashboardUI();
         ui.setVisible(true);
-        ui.startThreatFetcher();
+
+        // ❌ DO NOT call ui.startThreatFetcher()
+        // The DashboardUI constructor already starts ThreatFetcher.
 
         // Optional: stop Python when Java closes
         Runtime.getRuntime().addShutdownHook(new Thread(server::stopServer));
