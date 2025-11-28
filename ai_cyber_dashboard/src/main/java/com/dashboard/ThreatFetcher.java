@@ -12,7 +12,7 @@ import org.json.JSONObject;
 
 public class ThreatFetcher {
 
-    private DashboardUI ui;
+    private final DashboardUI ui;
 
     public ThreatFetcher(DashboardUI ui) {
         this.ui = ui;
@@ -64,7 +64,7 @@ public class ThreatFetcher {
 
             return new JSONArray(result.toString());
 
-        } catch (Exception e) {
+        } catch (java.io.IOException | org.json.JSONException e) {
             System.out.println("⚠️ Backend unreachable: " + e.getMessage());
             return null;
         }
