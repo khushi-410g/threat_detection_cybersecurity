@@ -14,24 +14,24 @@ import org.jfree.data.general.DefaultPieDataset;
 public class PieChartPanel extends JPanel {
 
     DefaultPieDataset dataset;
+    JFreeChart chart;
 
     public PieChartPanel() {
-        dataset = new DefaultPieDataset();
 
+        dataset = new DefaultPieDataset();
         dataset.setValue("normal", 1);
         dataset.setValue("port_scan", 1);
         dataset.setValue("ddos", 1);
         dataset.setValue("brute_force", 1);
 
-        JFreeChart chart = ChartFactory.createPieChart(
-                "Attack Types",
-                dataset,
-                true, true, false
+        chart = ChartFactory.createPieChart(
+                "Attack Types", dataset, true, true, false
         );
 
         PiePlot plot = (PiePlot) chart.getPlot();
         plot.setBackgroundPaint(new Color(50, 50, 50));
         plot.setOutlineVisible(false);
+        plot.setLabelBackgroundPaint(new Color(80,80,80));
 
         setLayout(new BorderLayout());
         add(new ChartPanel(chart), BorderLayout.CENTER);
@@ -39,6 +39,6 @@ public class PieChartPanel extends JPanel {
 
     public void increment(String threat) {
         Number current = dataset.getValue(threat);
-        dataset.setValue(threat, current.doubleValue() + 1);
+        dataset.setValue(threat, current.intValue() + 1);
     }
 }
