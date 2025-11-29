@@ -1,104 +1,105 @@
-const API_URL = "http://127.0.0.1:5000/detect";
-
-let threatCounts = {
+let pieChart;
+let lineChart;
+let threatCount = {
     normal: 0,
-    port_scan: 0,
     ddos: 0,
+    port_scan: 0,
     brute_force: 0
 };
 
-let chartTimeLabels = [];
-let chartTimeValues = [];
+let timeLabels = [];
+let timeValues = [];
 
-const pieCtx = document.getElementById('pieChart').getContext('2d');
-const timeCtx = document.getElementById('timeChart').getContext('2d');
+/* Fetch latest threat every 2 sec */
+setInterval(fetchThreat, 2000);
 
-// Pie chart
-const pieChart = new Chart(pieCtx, {
-    type: "pie",
-    data: {
-        labels: ["Normal", "Port Scan", "DDoS", "Brute Force"],
-        datasets: [{
-            data: [1,1,1,1],
-            backgroundColor: ["#2ecc71","#f1c40f","#e74c3c","#3498db"]
-        }]
-    }
-});
-
-// Time-series
-const timeChart = new Chart(timeCtx, {
-    type: "line",
-    data: {
-        labels: [],
-        datasets: [{
-            label: "Threat Confidence",
-            data: [],
-            borderColor: "#2980b9",
-            tension: 0.3
-        }]
-    }
-});
-
-async function fetchThreat() {
-    try {
-        const res = await fetch(`${API}/detect`);
-        const data = await res.json();
-
-        addToTable(data);
-        updateCharts(data);
-
-    } catch (err) {
-        console.error("Backend not reachable");
-    }
+function fetchThreat() {
+    fetch("http://127.0.0.1:5000/detect")
+        .then(res => res.json())
+        .then(data => {
+            updateLatest(data);
+            updateTable(data);
+            updatePie(data);
+            updateLine(data);
+        })
+        .catch(err => console.log("Backend not reachable", err));
 }
 
-function addToTable(data) {
-    const table = document.querySelector("#threatTable tbody");
+/* Display latest threat */
+function updateLatest(d) {
+    document.getElementById("latest-alert").innerHTML =
+        `<b>${d.threat}</b> detected from <b>${d.ip}</b> with confidence <b>${(d.confidence * 100).toFixed(1)}%</b>`;
+}
 
+/* Append to table */
+function updateTable(d) {
     const row = `
         <tr>
-            <td>${new Date().toLocaleTimeString()}</td>
-            <td>${data.ip}</td>
-            <td>${data.threat}</td>
-            <td>${(data.confidence * 100).toFixed(1)}%</td>
+            <td>${d.time}</td>
+            <td>${d.ip}</td>
+            <td>${d.threat}</td>
+            <td>${(d.confidence * 100).toFixed(1)}%</td>
         </tr>
     `;
-
-    table.insertAdjacentHTML("afterbegin", row);
+    document.querySelector("#log-table tbody").innerHTML = row +
+        document.querySelector("#log-table tbody").innerHTML;
 }
 
-function updateCharts(data) {
-    threatCounts[data.threat]++;
+/* Pie chart update */
+function updatePie(d) {
+    threatCount[d.threat]++;
 
-    pieChart.data.datasets[0].data = [
-        threatCounts.normal,
-        threatCounts.port_scan,
-        threatCounts.ddos,
-        threatCounts.brute_force
-    ];
-    pieChart.update();
+    const ctx = document.getElementById("pieChart");
 
-    chartTimeLabels.push(new Date().toLocaleTimeString());
-    chartTimeValues.push(data.confidence);
-
-    if(chartTimeLabels.length > 20) {
-        chartTimeLabels.shift();
-        chartTimeValues.shift();
+    if (!pieChart) {
+        pieChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ["normal", "ddos", "port_scan", "brute_force"],
+                datasets: [{
+                    data: [
+                        threatCount.normal,
+                        threatCount.ddos,
+                        threatCount.port_scan,
+                        threatCount.brute_force
+                    ],
+                    backgroundColor: ["#3498db", "#e74c3c", "#f1c40f", "#8e44ad"]
+                }]
+            }
+        });
+    } else {
+        pieChart.data.datasets[0].data = [
+            threatCount.normal,
+            threatCount.ddos,
+            threatCount.port_scan,
+            threatCount.brute_force
+        ];
+        pieChart.update();
     }
-
-    timeChart.data.labels = chartTimeLabels;
-    timeChart.data.datasets[0].data = chartTimeValues;
-    timeChart.update();
 }
 
-// Retrain button
-document.getElementById("trainBtn").onclick = async () => {
-    alert("Training Model...");
+/* Line chart update */
+function updateLine(d) {
+    const now = new Date().toLocaleTimeString();
+    timeLabels.push(now);
+    timeValues.push(Math.floor(Math.random() * 10)); // simulated
 
-    await fetch(`${API}/train`, { method: "POST" });
+    const ctx = document.getElementById("lineChart");
 
-    alert("Model retrained successfully!");
-};
-
-// Fetch every 2 seconds
-setInterval(fetchThreat, 2000);
+    if (!lineChart) {
+        lineChart = new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: timeLabels,
+                datasets: [{
+                    label: "Threat Activity",
+                    data: timeValues,
+                    borderColor: "#003366",
+                    fill: false
+                }]
+            }
+        });
+    } else {
+        lineChart.update();
+    }
+}
