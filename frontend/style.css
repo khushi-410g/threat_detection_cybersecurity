@@ -1,62 +1,74 @@
+/* === Academic Light Theme === */
 body {
     margin: 0;
-    padding: 0;
     font-family: Arial, sans-serif;
-    background: #f5f6fa;
+    background: #f7f7f7;
     color: #222;
 }
 
 header {
-    background: #2c3e50;
-    color: white;
-    padding: 15px;
-    display: flex;
-    align-items: center;
-}
-
-header h1 {
-    margin-left: 15px;
-}
-
-.icon-header {
-    height: 40px;
-}
-
-.grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-auto-rows: minmax(300px, auto);
-    gap: 20px;
+    background: #ffffff;
+    border-bottom: 2px solid #d0d0d0;
     padding: 20px;
+    text-align: center;
 }
 
+h1 {
+    font-size: 28px;
+    margin: 0;
+    color: #003366;
+}
+
+.subtitle {
+    color: #555;
+    font-size: 14px;
+}
+
+/* Layout */
+main {
+    display: flex;
+    padding: 20px;
+    gap: 20px;
+}
+
+.left-column, .right-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Cards */
 .card {
     background: white;
-    border-radius: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
     padding: 15px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    box-shadow: 0 0 4px rgba(0,0,0,0.05);
 }
 
-h2 {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+/* Latest alert */
+.alert-box {
+    padding: 15px;
+    background: #eaf3ff;
+    border-left: 4px solid #2980b9;
+    color: #003366;
+    font-size: 16px;
+    border-radius: 4px;
 }
 
-.icon {
-    height: 22px;
-}
-
+/* Table */
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 10px;
+    font-size: 14px;
 }
 
 table th {
-    background: #2c3e50;
+    background: #003366;
     color: white;
     padding: 8px;
+    text-align: left;
 }
 
 table td {
@@ -64,22 +76,6 @@ table td {
     border-bottom: 1px solid #ddd;
 }
 
-footer {
-    text-align: center;
-    padding: 20px;
-    margin-top: 20px;
-}
-
-button {
-    background: #2980b9;
-    padding: 12px 20px;
-    border: none;
-    color: white;
-    font-size: 16px;
-    border-radius: 8px;
-    cursor: pointer;
-}
-
-button:hover {
-    background: #3498db;
+tr:nth-child(even) {
+    background: #f0f6ff;
 }
