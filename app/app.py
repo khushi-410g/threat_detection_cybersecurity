@@ -2,12 +2,10 @@ from flask import Flask, jsonify
 import pandas as pd
 from joblib import load
 import hashlib
-from flask_cors import CORS   # your local file, NOT pip
 
 
 
 app = Flask(__name__)
-CORS(app)
 
 model = load("model/threat_model.pkl")
 encoder = load("model/protocol_encoder.pkl")
