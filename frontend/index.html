@@ -1,63 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AI Cyber Threat Dashboard – Academic Edition</title>
-
-    <link rel="stylesheet" href="style.css" />
-
-    <!-- Chart.js -->
+    <meta charset="UTF-8">
+    <title>AI-Powered Cyber Threat Dashboard</title>
+    <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <!-- Main logic -->
-    <script defer src="app.js"></script>
 </head>
 
 <body>
-    <header class="topbar">
-        <h1>AI-Powered Cyber Threat Dashboard</h1>
-        <p class="subtitle">Academic Version – Live Threat Monitoring</p>
-    </header>
 
-    <div class="container">
+<header>
+    <h1>AI-Powered Cyber Threat Dashboard</h1>
+    <h4>Academic Version – Live Threat Monitoring</h4>
+</header>
 
-        <!-- Latest Threat -->
-        <section class="card">
-            <h2>Latest Threat</h2>
-            <div id="latest-threat" class="latest-box">
-                Waiting for data...
-            </div>
-        </section>
+<section class="grid">
 
-        <!-- Threat Distribution -->
-        <section class="card">
-            <h2>Threat Distribution</h2>
-            <canvas id="pieChart" width="400" height="300"></canvas>
-        </section>
-
-        <!-- Threat Log -->
-        <section class="card wide">
-            <h2>Threat Log</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Time</th>
-                        <th>IP</th>
-                        <th>Type</th>
-                        <th>Confidence</th>
-                    </tr>
-                </thead>
-                <tbody id="log-table"></tbody>
-            </table>
-        </section>
-
-        <!-- Threats Over Time -->
-        <section class="card wide">
-            <h2>Threats Over Time</h2>
-            <canvas id="lineChart" width="800" height="300"></canvas>
-        </section>
-
+    <!-- Latest Threat -->
+    <div class="card">
+        <h2>Latest Threat</h2>
+        <div id="latestThreat" class="latest-box">Waiting for data...</div>
     </div>
+
+    <!-- Pie Chart -->
+    <div class="card">
+        <h2>Threat Distribution</h2>
+        <canvas id="pieChart"></canvas>
+    </div>
+
+</section>
+
+<!-- Threat Log -->
+<div class="card log-card">
+    <h2>Threat Log</h2>
+    <table id="logTable">
+        <thead>
+        <tr>
+            <th>Time</th>
+            <th>IP</th>
+            <th>Type</th>
+            <th>Confidence</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<!-- Line Graph -->
+<div class="card">
+    <h2>Threats Over Time</h2>
+    <canvas id="lineChart"></canvas>
+</div>
+
+<script src="app.js"></script>
 </body>
 </html>
