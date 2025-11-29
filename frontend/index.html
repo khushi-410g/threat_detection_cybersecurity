@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Cyber Threat Detection Dashboard</title>
+    <link rel="stylesheet" href="style.css" />
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <header>
+        <img src="assets/shield.png" class="icon-header">
+        <h1>AI Cyber Threat Detection Dashboard</h1>
+    </header>
+
+    <section class="grid">
+
+        <!-- Live Threat Feed -->
+        <div class="card">
+            <h2><img src="assets/warning.png" class="icon"> Live Threat Feed</h2>
+            <table id="threatTable">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>IP</th>
+                        <th>Threat Type</th>
+                        <th>Confidence</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <!-- Pie Chart -->
+        <div class="card">
+            <h2><img src="assets/ai.png" class="icon"> Threat Distribution</h2>
+            <canvas id="pieChart"></canvas>
+        </div>
+
+        <!-- Time Series -->
+        <div class="card">
+            <h2><img src="assets/network.png" class="icon"> Live Threat Trend</h2>
+            <canvas id="timeChart"></canvas>
+        </div>
+
+    </section>
+
+    <footer>
+        <button id="trainBtn">
+            <img src="assets/lock.png" class="icon"> Retrain AI Model
+        </button>
+        <p>© 2025 CyberSec AI Dashboard</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
