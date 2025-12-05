@@ -29,7 +29,8 @@ public class PieChartPanel extends JPanel {
 
         PiePlot plot = (PiePlot) chart.getPlot();
         plot.setBackgroundPaint(new Color(60, 60, 60));
-        plot.setLabelBackgroundPaint(new Color(80,80,80));
+        plot.setLabelPaint(new Color(255, 255, 102)); 
+
 
         setLayout(new BorderLayout());
         add(new ChartPanel(chart), BorderLayout.CENTER);
